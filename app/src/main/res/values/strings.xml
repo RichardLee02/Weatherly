@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Weather App</string>
+    <string name="learn_more">Learn More About <a href="https://openweathermap.org/api">Weather Data</a></string>
 </resources>

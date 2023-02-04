@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.text.method.LinkMovementMethod;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -42,6 +43,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView high;
     private TextView low;
     private TextView date;
+    private TextView feelsLike;
+    private TextView sunrise;
+    private TextView sunset;
+    private TextView humidity;
+    private TextView pressure;
+    private TextView wind;
+    private TextView learnMore;
     private EditText editText;
     private ImageView icon;
     private RequestQueue requestQueue;
@@ -59,15 +67,27 @@ public class MainActivity extends AppCompatActivity {
         high = (TextView) findViewById(R.id.high);
         low = (TextView) findViewById(R.id.low);
         date = (TextView) findViewById(R.id.date);
+        learnMore = (TextView) findViewById(R.id.learnMore);
+        feelsLike = (TextView) findViewById(R.id.feelsLike);
+        sunrise = (TextView) findViewById(R.id.sunrise);
+        sunset = (TextView) findViewById(R.id.sunset);
+        humidity = (TextView) findViewById(R.id.humidity);
+        pressure = (TextView) findViewById(R.id.pressure);
+        wind = (TextView) findViewById(R.id.wind);
         editText = (EditText) findViewById(R.id.editText);
         icon = (ImageView) findViewById(R.id.icon);
         requestQueue = Volley.newRequestQueue(this);
         inputCity = "Ottawa";
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        getLearnMore();
         requestPermission();
         getCurrentLocation();
         getWeather();
+    }
+
+    private void getLearnMore() {
+        learnMore.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
     private void getWeather() {
@@ -100,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getDateAndTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss z", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z", Locale.getDefault());
         String currentDate = "Last Updated: " + sdf.format(new Date());
         date.setText(currentDate);
     }
@@ -125,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                     String nameAPI = response.getString("name");
                     JSONObject mainAPI = response.getJSONObject("main");
                     JSONObject weatherAPI = response.getJSONArray("weather").getJSONObject(0);
+                    JSONObject windAPI = response.getJSONObject("wind");
                     JSONObject sysAPI = response.getJSONObject("sys");
                     String locationText = nameAPI + ", " + sysAPI.getString("country");
                     String temperatureText = mainAPI.getInt("temp") + "°C";
@@ -132,11 +153,26 @@ public class MainActivity extends AppCompatActivity {
                     String highText = "H:" + mainAPI.getInt("temp_max") + "°C";
                     String lowText = "L:" + mainAPI.getInt("temp_min") + "°C";
                     String iconURL = "https://openweathermap.org/img/wn/" + weatherAPI.getString("icon") + "@4x.png";
+                    String feelsLikeText = mainAPI.getInt("feels_like") + "°C";
+                    Date date = new Date((long) sysAPI.getInt("sunrise") * 1000);
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss z");
+                    String sunriseText = sdf.format(date);
+                    date = new Date((long) sysAPI.getInt("sunset") * 1000);
+                    String sunsetText = sdf.format(date);
+                    String humidityText = mainAPI.getInt("humidity") + "%";
+                    String pressureText = mainAPI.getInt("pressure") + " MB";
+                    String windText = (int) (windAPI.getInt("speed") * 3.6) + " KM/H";
                     location.setText(locationText);
                     temperature.setText(temperatureText);
                     weather.setText(weatherText);
                     high.setText(highText);
                     low.setText(lowText);
+                    feelsLike.setText(feelsLikeText);
+                    sunrise.setText(sunriseText);
+                    sunset.setText(sunsetText);
+                    humidity.setText(humidityText);
+                    pressure.setText(pressureText);
+                    wind.setText(windText);
                     Picasso.get().load(iconURL).resize(300,0).into(icon);
                     getDateAndTime();
                 } catch (JSONException e) {
